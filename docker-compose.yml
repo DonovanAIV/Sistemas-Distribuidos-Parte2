@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+    ports:
+      - "27017:27017"
+
+  pig:
+    build:
+      context: ./pig
+      dockerfile: Dockerfile
+    container_name: pig
+    depends_on:
+      - export
+    volumes:
+      - ./data:/data
+      - ./scripts:/scripts
+    tty: true
+    stdin_open: true
+
+  scraper:
+    build: ./scraper
+    container_name: scraper
+    depends_on:
+      - mongo
+    volumes:
+      - ./data:/data
+      - ./scripts:/scripts
+  
+  export:
+    build: ./export
+    container_name: export
+    depends_on:
+      - mongo
+    volumes:
+      - ./data:/data
+      - ./scripts:/scripts
